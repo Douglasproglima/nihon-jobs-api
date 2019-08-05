@@ -1,0 +1,19 @@
+API RESTFul com Laravel e autenticação com laravel-jwt-auth
+==============================================================
+
+1 - Escopo do Projeto Teste:
+	Construir uma API RESTful para armazenar vagas de emprego cadastradas por uma empresa.
+
+Sessões:
+	Instalação e configuração do Laravel
+	HTTP e RESTful
+	Models e Migrations
+	Controllers e Rotas
+	Middlewares
+	Autenticação e Sessão
+	Validações e tratamento de erros
+	Controle de cache com Redis
+------------------------------------------------------------------
+
+Instalação e configuração do Laravel
+	composer create-project laravel/laravel nihon-jobs-api

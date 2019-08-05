@@ -171,8 +171,6 @@ RESUMO:
                 }
             }
 
-
-
         JobsSeed.php:
             <?php
             use Illuminate\Database\Seeder;
@@ -196,12 +194,45 @@ RESUMO:
                     ]);
                 }
             }
+
+    DatabaseSeeder.php
+        public function run()
+        {
+            Model::unguard();
+
+            $this->call(CompaniesSeed::class);
+            $this->call(JobsSeed::class);
+
+            Model::reguard();
+        }
 ------------------------------------------------------------------
-14 -
+14 - ROUTES
+    Em routes/api.php adicione:
+
+        Route::group(array('prefix' => 'api/v1'), function()
+        {
+
+            Route::get('/', function () {
+                return response()->json(['message' => 'Jobs API', 'status' => 'Connected']);;
+            });
+
+            Route::resource('jobs', 'JobsController');
+            Route::resource('companies', 'CompaniesController');
+        });
+
+        Route::get('/', function () {
+            return redirect('api');
+        });
+
 
 ------------------------------------------------------------------
-15 -
+15 - CONTROLLERS(app/Http/Controllers):
+    php artisan make:controller JobsController
 
+    php artisan make:controller CompaniesController
+
+Listando rotas:
+    php artisan route:list
 ------------------------------------------------------------------
 16 -
 

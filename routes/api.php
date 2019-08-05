@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 		return $request->user();
 	});
 	
-	Route::group(array('prefix' => 'api/v1'), function()
+	Route::group(array('prefix' => 'api'), function()
 	{
 		
 		Route::get('/', function () {

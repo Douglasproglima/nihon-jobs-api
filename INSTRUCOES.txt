@@ -14,6 +14,217 @@ Sessões:
 	Validações e tratamento de erros
 	Controle de cache com Redis
 ------------------------------------------------------------------
-
-Instalação e configuração do Laravel
+2 - Instalação e configuração do Laravel
 	composer create-project laravel/laravel nihon-jobs-api
+
+------------------------------------------------------------------
+3 - ETAPA NÃO OBRIGATÓRIA:
+    3.1 - Por padrão, a partir da versão 5, o Laravel usa por padrão um middleware para previnir CSRF.
+    Porém para um projeto API não há necessidade de um middleware.
+
+    Então em projeto real, o correto seria remover a pasta app/Http e abrir o arquivo Kernel.php. e remover:
+        \App\Http\Middleware\VerifyCsrfToken::class,
+
+    3.2 - Há inúmeros arquivos inúteis para uma api como:
+        resources/views
+            welcome.blade.php
+
+        app/Http/Controllers
+            qualquer controller default
+
+------------------------------------------------------------------
+4 - SETUP - ARQUIVO .env
+   Informar as credenciais do BD.
+
+OBS:
+APP_KEY normalmente é gerado na instalação, mas caso algo de errado, é só executar o comando:
+    php artisan key:generate
+
+------------------------------------------------------------------
+5 - CRIAR BD
+    Acessar a ferramenta de gestão do BD e criar o BD na mão:
+        create database --nome-banco
+
+------------------------------------------------------------------
+6 - AJUSTANDO O TIMEZONE
+    Abrir o arquivo /config/app.php e alterar o timezone:
+
+Lista de todos os TIMESZONES:
+    https://www.php.net/manual/pt_BR/timezones.php
+
+------------------------------------------------------------------
+7 - URLS
+    /jobs               // Returns all jobs
+    /jobs/add           // Render a form to add a new job
+    /job/123            // Return the job with ID 123
+    /companies/123      // Returns the company with ID 123
+    /companies/123/edit  // Render a form to edit the company with ID 123
+
+------------------------------------------------------------------
+8 - Verbos HTTP
+    GET     /jobs           // Returns all jobs
+    DELETE  /job/123        // Delete the job with ID 123
+    POST    /companies      // Create a new company through post data
+    PUT     /companies/123  // Update a company with ID 123
+
+------------------------------------------------------------------
+9 - Status Code
+    https://httpstatusdogs.com/
+
+------------------------------------------------------------------
+10 - MODELS
+     Company:
+        php artisan make:model Company
+
+     Jobs:
+        php artisan make:model Job
+
+OBS:
+    Detalhes sobre migration no Laravel:
+        https://laravel.com/docs/5.8/migrations
+------------------------------------------------------------------
+11 - MIGRATIONS
+    Company: tem um nome, email para login/login, url para o website, url para o logo e uma senha;
+    Job....: possui um titulo, uma descrição, um local de trabalho, se é permitido trabalhar remotamente e o tipo do job.
+
+RODAR:
+    php artisan make:migration create_companies_table --create=companies
+
+    php artisan make:migration create_jobs_table --create=jobs
+ALTERAR MIGRATIONS:
+    Company Dentro do metodo up() Schema::create Adicionar os atributos:
+        $table->bigIncrements('id');
+        $table->string('name', 100);
+        $table->string('email', 60);
+        $table->string('website');
+        $table->string('logo');
+        $table->string('password', 64);
+        $table->timestamps();
+        $table->softDeletes();
+
+    Job Dentro do metodo up() Schema::create Adicionar os atributos:
+        $table->bigIncrements('id');
+        $table->string('title');
+        $table->longText('description');
+        $table->string('local');
+        $table->enum('remote', ['yes', 'no']);
+        $table->integer('type');
+        $table->integer('company_id')->unsigned();
+        $table->foreign('company_id')
+            ->references('id')
+            ->on('companies')
+            ->onDelete('cascade');
+        $table->timestamps();
+        $table->softDeletes();
+
+RESUMAO DOS ATRIBUTOS:
+    ->Migration através do artisan CLI;
+    ->Add Um Schema simples utilizando tipos como INT, VARCHAR, ENUM, LONGTEXT, etc;
+    ->Também add um timestamps e softDeletes pelas mesmas razões da tabela posterior;
+    ->Add uma foreign key company_id com a regra unsigned para não manter um relacionamento restrito ao criar/modificar as tabelas;
+    ->Referencia a tabela Companies e o delete cascade quando o ID referente for deletado.
+
+------------------------------------------------------------------
+12 - MODELS
+    Adicionar no corpo da Classe COMPANYS:
+        protected $fillable = ['name', 'email', 'website', 'logo', 'password'];
+        protected $hidden = ['password'];
+        protected $dates = ['deleted_at'];
+        public function jobs(){
+            return $this->hasMany('App\Job');
+        }
+
+    Adicionar no corpo da Classe JOB:
+
+        protected $fillable = ['title', 'description', 'local', 'remote', 'type', 'company_id'];
+        protected $dates = ['deleted_at'];
+
+        function company() {
+            return $this->belongsTo('App\Company');
+        }
+
+RESUMO:
+    1 - white lists através do atributo $fillable;
+    2 - Relacionamento de Company X Job através belongsTo e hasMany além de
+        deixar explicito que o soft delete será através do atributo $dates;
+
+------------------------------------------------------------------
+13 - SEEDS PARA TESTES(Não Obrigatório)
+    1 - Criar dois arquivos em database/seeds:
+        CompaniesSeed.php:
+            <?php
+            use Illuminate\Database\Seeder;
+            class CompaniesSeed extends Seeder
+            {
+                /**
+                 * Run the database seeds.
+                 *
+                 * @return void
+                 */
+                public function run()
+                {
+                    App\Company::create([
+                        'name' => str_random(10),
+                        'email' => str_random(10).'@gmail.com',
+                        'password' => bcrypt('secret'),
+                    ]);
+                }
+            }
+
+
+
+        JobsSeed.php:
+            <?php
+            use Illuminate\Database\Seeder;
+            class JobsSeed extends Seeder
+            {
+                /**
+                 * Run the database seeds.
+                 *
+                 * @return void
+                 */
+                public function run()
+                {
+                    App\Job::create([
+                        'title' => str_random(10),
+                        'description' => str_random(1000),
+                        'local' => 'São Paulo / SP',
+                        'title' => str_random(10),
+                        'remote' => 'no',
+                        'type' => 3,
+                        'company_id' => 1,
+                    ]);
+                }
+            }
+------------------------------------------------------------------
+14 -
+
+------------------------------------------------------------------
+15 -
+
+------------------------------------------------------------------
+16 -
+
+------------------------------------------------------------------
+17 -
+
+------------------------------------------------------------------
+18 -
+
+------------------------------------------------------------------
+19 -
+
+------------------------------------------------------------------
+20 -
+
+------------------------------------------------------------------
+21 -
+
+------------------------------------------------------------------
+22 -
+
+------------------------------------------------------------------
+23 -
+
+------------------------------------------------------------------
+24 -
